@@ -1,0 +1,14 @@
+{:paths ["src"]
+ :aliases
+ {:test
+  {:extra-paths ["test"]
+   :main-opts ["-m" "ring-inertia.test-runner"]}
+
+  :lint
+  {:extra-paths ["test"]
+   :main-opts ["-m" "ring-inertia.lint"]}
+
+  :dev
+  {:extra-paths ["examples/server/src"]
+   :extra-deps {ring/ring-jetty-adapter {:mvn/version "1.15.0"}}
+   :main-opts ["-m" "example.server"]}}}

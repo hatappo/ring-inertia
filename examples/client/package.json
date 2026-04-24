@@ -1,0 +1,21 @@
+{
+  "name": "ring-inertia-client-example",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.33.2",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "lint": "clojure -M:lint",
+    "check": "clojure -M:test"
+  },
+  "dependencies": {
+    "@inertiajs/react": "^3.0.0",
+    "@inertiajs/vite": "^3.0.0",
+    "@vitejs/plugin-react": "^6.0.1",
+    "vite": "^8.0.10",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "devDependencies": {}
+}
