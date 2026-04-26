@@ -1,0 +1,13 @@
+{
+  "name": "ring-inertia-client-replicant-example",
+  "private": true,
+  "packageManager": "pnpm@10.33.2",
+  "scripts": {
+    "dev": "shadow-cljs watch app",
+    "build": "shadow-cljs release app"
+  },
+  "dependencies": {
+    "shadow-cljs": "^3.4.1"
+  },
+  "devDependencies": {}
+}

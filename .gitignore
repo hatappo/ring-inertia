@@ -6,7 +6,9 @@ node_modules
 .pnpm-store
 
 dist
+examples/client-replicant/public/js
 
 .cpcache
+.shadow-cljs
 .lsp/.cache
 .clj-kondo/.cache

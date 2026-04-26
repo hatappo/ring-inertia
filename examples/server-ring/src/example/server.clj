@@ -13,7 +13,7 @@
 
 (defonce next-todo-id* (atom 3))
 
-(def asset-tags
+(def react-asset-tags
   ["<script type=\"module\">
      import RefreshRuntime from 'http://localhost:5173/@react-refresh'
      RefreshRuntime.injectIntoGlobalHook(window)
@@ -23,6 +23,18 @@
    </script>"
    "<script type=\"module\" src=\"http://localhost:5173/@vite/client\"></script>"
    "<script type=\"module\" src=\"http://localhost:5173/src/main.jsx\"></script>"])
+
+(def replicant-asset-tags
+  ["<link rel=\"stylesheet\" href=\"http://localhost:5174/styles.css\">"
+   "<script defer src=\"http://localhost:5174/js/main.js\"></script>"])
+
+(defn- client-kind []
+  (keyword (or (System/getenv "INERTIA_CLIENT") "react")))
+
+(defn- asset-tags []
+  (case (client-kind)
+    :replicant replicant-asset-tags
+    react-asset-tags))
 
 (defn- home [request]
   (let [todos @todos*
@@ -110,7 +122,7 @@
       (inertia/wrap-inertia
        {:version "dev"
         :title "Ring Inertia Example"
-        :asset-tags asset-tags
+        :asset-tags (asset-tags)
         :shared-props (fn [_]
                         {:appName "Ring Inertia"})})))
 

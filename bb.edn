@@ -9,7 +9,7 @@
 
   check
   {:doc "Run all repository checks"
-   :depends [ring:lint ring:test client-react:build]}
+   :depends [ring:lint ring:test client-react:build client-replicant:build]}
 
   ring:lint
   {:doc "Load ring-inertia Clojure namespaces used for lint-style validation"
@@ -41,8 +41,34 @@
                  :shutdown false}
                 "pnpm build")}
 
+  client-replicant:install
+  {:doc "Install Replicant/shadow-cljs example dependencies"
+   :task (shell {:dir "examples/client-replicant"
+                 :extra-env {"CI" "true"}
+                 :shutdown false}
+                "pnpm install")}
+
+  client-replicant:dev
+  {:doc "Start the Replicant/shadow-cljs example dev server"
+   :task (shell {:dir "examples/client-replicant"
+                 :shutdown false}
+                "pnpm dev")}
+
+  client-replicant:build
+  {:doc "Build the Replicant/shadow-cljs example"
+   :task (shell {:dir "examples/client-replicant"
+                 :shutdown false}
+                "pnpm build")}
+
   server-ring:dev
   {:doc "Start the Ring example server"
    :task (shell {:dir "examples/server-ring"
+                 :shutdown false}
+                "clojure -M:dev")}
+
+  server-ring:dev-replicant
+  {:doc "Start the Ring example server with Replicant assets"
+   :task (shell {:dir "examples/server-ring"
+                 :extra-env {"INERTIA_CLIENT" "replicant"}
                  :shutdown false}
                 "clojure -M:dev")}}}
