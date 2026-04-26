@@ -5,4 +5,5 @@ node_modules
 dist
 
 .cpcache
+.lsp/.cache
 .clj-kondo/.cache
