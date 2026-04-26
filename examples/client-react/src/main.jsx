@@ -19,7 +19,7 @@ if (document.querySelector('script[data-page="app"]')) {
         <h1>Open the Ring server URL</h1>
         <p>
           This React entry expects an Inertia page object rendered by Ring.
-          Start <code>cd examples/server && clojure -M:dev</code>, then open
+          Start <code>bb server-ring:dev</code>, then open
           <a href="http://localhost:3000">http://localhost:3000</a>.
         </p>
       </section>

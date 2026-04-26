@@ -1,11 +1,20 @@
-# ring-inertia
+# inertia adapters
 
-Ring Middleware for the Inertia v3 protocol.
+Monorepo for Inertia adapters and examples.
 
-## Scope
+## Packages
 
-This repository currently implements the protocol basics needed for a Clojure
-Ring server and a React Inertia client to communicate:
+- `ring-inertia`: Ring middleware for the Inertia v3 protocol.
+- `replicant-inertia`: Replicant client adapter for Inertia. This package is
+  scaffolded but not implemented yet.
+- `examples/client-react`: React/Vite example client.
+- `examples/client-replicant`: Replicant example client placeholder.
+- `examples/server-ring`: Ring example server.
+
+## ring-inertia Scope
+
+`ring-inertia` currently implements the protocol basics needed for a Clojure
+Ring server and an Inertia client to communicate:
 
 - Initial full-page HTML responses with a JSON page object in
   `<script type="application/json" data-page="app">`
@@ -30,14 +39,14 @@ bb check
 Start the React/Vite client sample:
 
 ```sh
-bb client:install
-bb client:dev
+bb client-react:install
+bb client-react:dev
 ```
 
 In another terminal, start the Ring server sample:
 
 ```sh
-bb server:dev
+bb server-ring:dev
 ```
 
 Open <http://localhost:3000>. Do not open the Vite dev server URL

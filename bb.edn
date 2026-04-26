@@ -1,36 +1,48 @@
 {:tasks
  {lint
   {:doc "Load Clojure namespaces used for lint-style validation"
-   :task (shell {:shutdown false} "clojure -M:lint")}
+   :depends [ring:lint]}
 
   test
   {:doc "Run Clojure tests"
-   :task (shell {:shutdown false} "clojure -M:test")}
+   :depends [ring:test]}
 
   check
   {:doc "Run all repository checks"
-   :depends [lint test client:build]}
+   :depends [ring:lint ring:test client-react:build]}
 
-  client:install
+  ring:lint
+  {:doc "Load ring-inertia Clojure namespaces used for lint-style validation"
+   :task (shell {:dir "ring-inertia"
+                 :shutdown false}
+                "clojure -M:lint")}
+
+  ring:test
+  {:doc "Run ring-inertia Clojure tests"
+   :task (shell {:dir "ring-inertia"
+                 :shutdown false}
+                "clojure -M:test")}
+
+  client-react:install
   {:doc "Install React/Vite example dependencies"
-   :task (shell {:dir "examples/client"
+   :task (shell {:dir "examples/client-react"
                  :shutdown false}
                 "pnpm install")}
 
-  client:dev
+  client-react:dev
   {:doc "Start the React/Vite example dev server"
-   :task (shell {:dir "examples/client"
+   :task (shell {:dir "examples/client-react"
                  :shutdown false}
                 "pnpm dev")}
 
-  client:build
+  client-react:build
   {:doc "Build the React/Vite example"
-   :task (shell {:dir "examples/client"
+   :task (shell {:dir "examples/client-react"
                  :shutdown false}
                 "pnpm build")}
 
-  server:dev
+  server-ring:dev
   {:doc "Start the Ring example server"
-   :task (shell {:dir "examples/server"
+   :task (shell {:dir "examples/server-ring"
                  :shutdown false}
                 "clojure -M:dev")}}}
