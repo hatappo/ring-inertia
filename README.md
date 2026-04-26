@@ -53,6 +53,10 @@ Inertia page object is rendered by the Ring server.
 Expected browser behavior:
 
 - The initial `Home` page is served by Ring as HTML.
+- Adding a todo sends an Inertia `POST` to the Ring server and redirects back to
+  the todo list.
+- Each todo can be completed, reopened, or deleted through Inertia `PATCH` and
+  `DELETE` requests.
 - `Open About` navigates through an Inertia XHR request.
 - `Reload server time` performs a partial reload for `serverTime`.
 - `PATCH then redirect` sends an Inertia `PATCH` to Ring. The sample route
@@ -64,15 +68,20 @@ Protocol-level checks:
 
 ```sh
 curl -i http://localhost:3000/
+curl -i -X POST -H 'X-Inertia: true' 'http://localhost:3000/todos?title=Write%20README'
+curl -i -X PATCH -H 'X-Inertia: true' http://localhost:3000/todos/3/toggle
+curl -i -X DELETE -H 'X-Inertia: true' http://localhost:3000/todos/3
 curl -i -H 'X-Inertia: true' -H 'X-Inertia-Version: dev' http://localhost:3000/about
 curl -i -H 'X-Inertia: true' -H 'X-Inertia-Version: old' http://localhost:3000/about
 curl -i -X PATCH -H 'X-Inertia: true' http://localhost:3000/messages
 curl -i -H 'X-Inertia: true' http://localhost:3000/external
 ```
 
-The second command should return `200` with `X-Inertia: true`. The third command
-should return `409` with `X-Inertia-Location`. The fourth command should return
-`303` with `Location: /`. The fifth command should return `409` with
+The first command should return the initial HTML page. The todo mutation
+commands should return redirects back to `/`. The About command should return
+`200` with `X-Inertia: true`. The stale-version command should return `409`
+with `X-Inertia-Location`. The redirect sample should return `303` with
+`Location: /`. The external redirect sample should return `409` with
 `X-Inertia-Location: https://inertiajs.com`.
 
 ## Server Usage

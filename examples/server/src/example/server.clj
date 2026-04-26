@@ -1,11 +1,14 @@
 (ns example.server
-  (:require [ring.adapter.jetty :as jetty]
+  (:require [clojure.string :as str]
+            [ring.adapter.jetty :as jetty]
             [ring.inertia :as inertia]))
 
-(def todos
-  [{:id 1 :title "Ring middleware implements the Inertia protocol" :done true}
-   {:id 2 :title "React page receives server props" :done true}
-   {:id 3 :title "Navigate without a full browser reload" :done false}])
+(defonce todos*
+  (atom [{:id 1 :title "Implement the Ring middleware" :done true}
+         {:id 2 :title "Wire it to a React Inertia client" :done true}
+         {:id 3 :title "Try the redirect protocol examples" :done false}]))
+
+(defonce next-todo-id* (atom 3))
 
 (def asset-tags
   ["<script type=\"module\">
@@ -19,32 +22,94 @@
    "<script type=\"module\" src=\"http://localhost:5173/src/main.jsx\"></script>"])
 
 (defn- home [request]
-  (inertia/render request "Home" {:todos todos
-                                  :serverTime (str (java.time.Instant/now))}))
+  (let [todos @todos*
+        open-count (count (remove :done todos))]
+    (inertia/render request "Home" {:todos todos
+                                    :todoStats {:total (count todos)
+                                                :open open-count
+                                                :done (- (count todos) open-count)}
+                                    :serverTime (str (java.time.Instant/now))})))
 
 (defn- about [request]
   (inertia/render request "About" {:description "This page was rendered by a Clojure Ring handler."}))
 
+(defn- url-decode [value]
+  (java.net.URLDecoder/decode value java.nio.charset.StandardCharsets/UTF_8))
+
+(defn- query-params [request]
+  (if-let [query (:query-string request)]
+    (into {}
+          (keep (fn [pair]
+                  (let [[raw-key raw-value] (str/split pair #"=" 2)]
+                    (when-not (str/blank? raw-key)
+                      [(url-decode raw-key) (url-decode (or raw-value ""))]))))
+          (str/split query #"&"))
+    {}))
+
 (defn- query-param [request key]
-  (some->> (:query-string request)
-           (re-find (re-pattern (str "(?:^|&)" key "=([^&]+)")))
-           second))
+  (get (query-params request) key))
 
 (defn- visit-counter [request]
   (inertia/render request "Visits" {:count (parse-long (or (query-param request "count") "0"))}))
 
+(defn- redirect-home
+  ([]
+   (redirect-home 302))
+  ([status]
+   {:status status
+    :headers {"Location" "/"}
+    :body ""}))
+
+(defn- create-todo [request]
+  (let [title (str/trim (or (query-param request "title") ""))]
+    (when-not (str/blank? title)
+      (swap! todos* conj {:id (swap! next-todo-id* inc)
+                          :title title
+                          :done false}))
+    (redirect-home 303)))
+
+(defn- todo-id-route [uri suffix]
+  (some->> uri
+           (re-matches (re-pattern (str "^/todos/(\\d+)" suffix "$")))
+           second
+           parse-long))
+
+(defn- toggle-todo [id]
+  (swap! todos*
+         (fn [todos]
+           (mapv (fn [todo]
+                   (if (= id (:id todo))
+                     (update todo :done not)
+                     todo))
+                 todos)))
+  (redirect-home))
+
+(defn- delete-todo [id]
+  (swap! todos* (fn [todos] (vec (remove #(= id (:id %)) todos))))
+  (redirect-home))
+
 (defn routes [request]
-  (case [(:request-method request) (:uri request)]
-    [:get "/"] (home request)
-    [:get "/about"] (about request)
-    [:get "/visits"] (visit-counter request)
-    [:get "/external"] (inertia/external-redirect "https://inertiajs.com")
-    [:patch "/messages"] {:status 302
-                          :headers {"Location" "/"}
-                          :body ""}
-    {:status 404
-     :headers {"Content-Type" "text/plain; charset=utf-8"}
-     :body "Not found"}))
+  (let [{:keys [request-method uri]} request]
+    (or
+     (case [request-method uri]
+       [:get "/"] (home request)
+       [:get "/about"] (about request)
+       [:get "/visits"] (visit-counter request)
+       [:get "/external"] (inertia/external-redirect "https://inertiajs.com")
+       [:post "/todos"] (create-todo request)
+       [:patch "/messages"] {:status 302
+                             :headers {"Location" "/"}
+                             :body ""}
+       nil)
+     (when (= request-method :patch)
+       (when-let [id (todo-id-route uri "/toggle")]
+         (toggle-todo id)))
+     (when (= request-method :delete)
+       (when-let [id (todo-id-route uri "")]
+         (delete-todo id)))
+     {:status 404
+      :headers {"Content-Type" "text/plain; charset=utf-8"}
+      :body "Not found"})))
 
 (def app
   (inertia/wrap-inertia
