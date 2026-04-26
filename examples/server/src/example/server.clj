@@ -1,6 +1,9 @@
 (ns example.server
   (:require [clojure.string :as str]
             [ring.adapter.jetty :as jetty]
+            [ring.middleware.json :refer [wrap-json-params]]
+            [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+            [ring.middleware.params :refer [wrap-params]]
             [ring.inertia :as inertia]))
 
 (defonce todos*
@@ -33,21 +36,9 @@
 (defn- about [request]
   (inertia/render request "About" {:description "This page was rendered by a Clojure Ring handler."}))
 
-(defn- url-decode [value]
-  (java.net.URLDecoder/decode value java.nio.charset.StandardCharsets/UTF_8))
-
-(defn- query-params [request]
-  (if-let [query (:query-string request)]
-    (into {}
-          (keep (fn [pair]
-                  (let [[raw-key raw-value] (str/split pair #"=" 2)]
-                    (when-not (str/blank? raw-key)
-                      [(url-decode raw-key) (url-decode (or raw-value ""))]))))
-          (str/split query #"&"))
-    {}))
-
 (defn- query-param [request key]
-  (get (query-params request) key))
+  (or (get-in request [:params (keyword key)])
+      (get-in request [:params key])))
 
 (defn- visit-counter [request]
   (inertia/render request "Visits" {:count (parse-long (or (query-param request "count") "0"))}))
@@ -112,13 +103,16 @@
       :body "Not found"})))
 
 (def app
-  (inertia/wrap-inertia
-   routes
-   {:version "dev"
-    :title "Ring Inertia Example"
-    :asset-tags asset-tags
-    :shared-props (fn [_]
-                    {:appName "Ring Inertia"})}))
+  (-> routes
+      (wrap-json-params {:keywords? true})
+      wrap-keyword-params
+      wrap-params
+      (inertia/wrap-inertia
+       {:version "dev"
+        :title "Ring Inertia Example"
+        :asset-tags asset-tags
+        :shared-props (fn [_]
+                        {:appName "Ring Inertia"})})))
 
 (defn -main [& _]
   (jetty/run-jetty #'app {:port 3000 :join? true}))

@@ -1,21 +1,18 @@
-import { Link, router } from '@inertiajs/react'
-import { useState } from 'react'
+import { Link, router, useForm } from '@inertiajs/react'
 
 export default function Home({ appName, todos, todoStats, serverTime }) {
-  const [title, setTitle] = useState('')
+  const todoForm = useForm({ title: '' })
 
   function createTodo(event) {
     event.preventDefault()
 
-    const trimmedTitle = title.trim()
-
-    if (!trimmedTitle) {
+    if (!todoForm.data.title.trim()) {
       return
     }
 
-    router.post(`/todos?title=${encodeURIComponent(trimmedTitle)}`, {}, {
+    todoForm.post('/todos', {
       preserveScroll: true,
-      onSuccess: () => setTitle(''),
+      onSuccess: () => todoForm.reset(),
     })
   }
 
@@ -88,10 +85,10 @@ export default function Home({ appName, todos, todoStats, serverTime }) {
                 id="new-todo"
                 name="title"
                 placeholder="Write a task for the Ring server"
-                value={title}
-                onChange={(event) => setTitle(event.target.value)}
+                value={todoForm.data.title}
+                onChange={(event) => todoForm.setData('title', event.target.value)}
               />
-              <button className="button primary" type="submit">
+              <button className="button primary" disabled={todoForm.processing} type="submit">
                 Add
               </button>
             </div>

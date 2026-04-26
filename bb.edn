@@ -1,0 +1,36 @@
+{:tasks
+ {lint
+  {:doc "Load Clojure namespaces used for lint-style validation"
+   :task (shell {:shutdown false} "clojure -M:lint")}
+
+  test
+  {:doc "Run Clojure tests"
+   :task (shell {:shutdown false} "clojure -M:test")}
+
+  check
+  {:doc "Run all repository checks"
+   :depends [lint test client:build]}
+
+  client:install
+  {:doc "Install React/Vite example dependencies"
+   :task (shell {:dir "examples/client"
+                 :shutdown false}
+                "pnpm install")}
+
+  client:dev
+  {:doc "Start the React/Vite example dev server"
+   :task (shell {:dir "examples/client"
+                 :shutdown false}
+                "pnpm dev")}
+
+  client:build
+  {:doc "Build the React/Vite example"
+   :task (shell {:dir "examples/client"
+                 :shutdown false}
+                "pnpm build")}
+
+  server:dev
+  {:doc "Start the Ring example server"
+   :task (shell {:dir "examples/server"
+                 :shutdown false}
+                "clojure -M:dev")}}}

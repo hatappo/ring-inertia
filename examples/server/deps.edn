@@ -1,0 +1,7 @@
+{:paths ["src"]
+ :deps {io.github.hatappo/ring-inertia {:local/root "../.."}
+        ring/ring-jetty-adapter {:mvn/version "1.15.0"}
+        ring/ring-json {:mvn/version "0.5.1"}}
+ :aliases
+ {:dev
+  {:main-opts ["-m" "example.server"]}}}

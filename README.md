@@ -22,28 +22,22 @@ Ring server and a React Inertia client to communicate:
 Run checks:
 
 ```sh
-pnpm lint
-pnpm check
+bb check
 ```
 
 ## Sample Application
 
-Run every command from the project root.
-
 Start the React/Vite client sample:
 
 ```sh
-pnpm install
-pnpm example:client:dev
+bb client:install
+bb client:dev
 ```
 
-The React/Vite sample lives in `examples/client`. The command above runs that
-package through the root pnpm workspace.
-
-In another terminal, from the project root, start the Ring server sample:
+In another terminal, start the Ring server sample:
 
 ```sh
-clojure -M:dev
+bb server:dev
 ```
 
 Open <http://localhost:3000>. Do not open the Vite dev server URL
@@ -54,7 +48,8 @@ Expected browser behavior:
 
 - The initial `Home` page is served by Ring as HTML.
 - Adding a todo sends an Inertia `POST` to the Ring server and redirects back to
-  the todo list.
+  the todo list. The React page uses Inertia's `useForm`, and the Ring sample
+  parses the JSON request body.
 - Each todo can be completed, reopened, or deleted through Inertia `PATCH` and
   `DELETE` requests.
 - `Open About` navigates through an Inertia XHR request.
@@ -68,7 +63,7 @@ Protocol-level checks:
 
 ```sh
 curl -i http://localhost:3000/
-curl -i -X POST -H 'X-Inertia: true' 'http://localhost:3000/todos?title=Write%20README'
+curl -i -X POST -H 'X-Inertia: true' -H 'Content-Type: application/json' --data '{"title":"Write README"}' http://localhost:3000/todos
 curl -i -X PATCH -H 'X-Inertia: true' http://localhost:3000/todos/3/toggle
 curl -i -X DELETE -H 'X-Inertia: true' http://localhost:3000/todos/3
 curl -i -H 'X-Inertia: true' -H 'X-Inertia-Version: dev' http://localhost:3000/about
