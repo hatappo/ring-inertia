@@ -1,21 +1,14 @@
-# ring-inertia
+# inertia adapters
 
-Ring Middleware for the Inertia v3 protocol.
+Monorepo for Inertia adapters and examples.
 
-## Scope
+## Packages
 
-This repository currently implements the protocol basics needed for a Clojure
-Ring server and a React Inertia client to communicate:
-
-- Initial full-page HTML responses with a JSON page object in
-  `<script type="application/json" data-page="app">`
-- XHR Inertia responses using `X-Inertia: true`, JSON bodies, and
-  `Vary: X-Inertia`
-- Asset version mismatch handling with `409 Conflict` and
-  `X-Inertia-Location`
-- Partial reload filtering through `X-Inertia-Partial-*` headers
-- `302` to `303` normalization for Inertia `PUT`, `PATCH`, and `DELETE`
-  redirects
+- `ring-inertia`: Ring middleware for the Inertia v3 protocol.
+- `replicant-inertia`: Replicant client adapter for Inertia.
+- `examples/client-react`: React/Vite example client.
+- `examples/client-replicant`: Replicant/shadow-cljs example client.
+- `examples/server-ring`: Ring example server.
 
 ## Development
 
@@ -27,29 +20,53 @@ bb check
 
 ## Sample Application
 
+All commands below are run from the repository root.
+
+### React Client
+
 Start the React/Vite client sample:
 
 ```sh
-bb client:install
-bb client:dev
+bb client-react:install
+bb client-react:dev
 ```
 
 In another terminal, start the Ring server sample:
 
 ```sh
-bb server:dev
+bb server-ring:dev
 ```
 
 Open <http://localhost:3000>. Do not open the Vite dev server URL
 `http://localhost:5173` directly; it only serves the React assets, and the
 Inertia page object is rendered by the Ring server.
 
+### Replicant Client
+
+Start the Replicant/shadow-cljs client sample:
+
+```sh
+bb client-replicant:install
+bb client-replicant:dev
+```
+
+In another terminal, start the Ring server sample with Replicant assets:
+
+```sh
+bb server-ring:dev-replicant
+```
+
+Open <http://localhost:3000>. Do not open the shadow-cljs dev server URL
+`http://localhost:5174` directly; it only serves Replicant assets, and the
+Inertia page object is rendered by the Ring server.
+
 Expected browser behavior:
 
 - The initial `Home` page is served by Ring as HTML.
 - Adding a todo sends an Inertia `POST` to the Ring server and redirects back to
-  the todo list. The React page uses Inertia's `useForm`, and the Ring sample
-  parses the JSON request body.
+  the todo list. The React page uses Inertia's `useForm`; the Replicant page
+  uses the `replicant-inertia` navigation helpers. The Ring sample parses the
+  JSON request body.
 - Each todo can be completed, reopened, or deleted through Inertia `PATCH` and
   `DELETE` requests.
 - `Open About` navigates through an Inertia XHR request.
@@ -79,27 +96,12 @@ with `X-Inertia-Location`. The redirect sample should return `303` with
 `Location: /`. The external redirect sample should return `409` with
 `X-Inertia-Location: https://inertiajs.com`.
 
-## Server Usage
-
-```clojure
-(ns app
-  (:require [ring.inertia :as inertia]))
-
-(defn routes [request]
-  (case [(:request-method request) (:uri request)]
-    [:get "/"] (inertia/render request "Home" {:message "Hello from Ring"})
-    {:status 404 :headers {} :body "Not found"}))
-
-(def app
-  (inertia/wrap-inertia
-   routes
-   {:version "app-v1"
-    :asset-tags ["<script type=\"module\" src=\"http://localhost:5173/src/main.jsx\"></script>"]}))
-```
-
 ## References
 
 - Inertia v3 protocol: <https://inertiajs.com/docs/v3/core-concepts/the-protocol>
 - Inertia client setup: <https://inertiajs.com/docs/v3/installation/client-side-setup>
 - Ring response helpers and response map conventions:
   <https://ring-clojure.github.io/ring/ring.util.response.html>
+- Ring server adapter usage: [`ring-inertia/README.md`](ring-inertia/README.md)
+- Replicant: <https://github.com/cjohansen/replicant>
+- Replicant client adapter usage: [`replicant-inertia/README.md`](replicant-inertia/README.md)

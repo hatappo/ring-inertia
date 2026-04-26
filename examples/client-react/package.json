@@ -1,13 +1,11 @@
 {
-  "name": "ring-inertia-client-example",
+  "name": "ring-inertia-client-react-example",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@10.33.2",
   "scripts": {
     "dev": "vite --host 127.0.0.1",
-    "build": "vite build",
-    "lint": "clojure -M:lint",
-    "check": "clojure -M:test"
+    "build": "vite build"
   },
   "dependencies": {
     "@inertiajs/react": "^3.0.0",
